@@ -1,0 +1,31 @@
+#!/bin/sh
+# ==============================================================================
+# Git Pre-Push Hook: Blocks git push if any automated test case fails
+# ==============================================================================
+
+echo "🔍 [PRE-PUSH HOOK] Running automated test suite before pushing..."
+
+# Run pytest on the test suite
+if command -v pytest >/dev/null 2>&1; then
+    pytest tests/ -v
+elif [ -f "./venv/Scripts/pytest.exe" ]; then
+    ./venv/Scripts/pytest.exe tests/ -v
+elif [ -f "./venv/bin/pytest" ]; then
+    ./venv/bin/pytest tests/ -v
+elif command -v python >/dev/null 2>&1; then
+    python -m pytest tests/ -v
+else
+    echo "⚠️ Python or pytest not found. Skipping local hook check."
+    exit 0
+fi
+
+STATUS=$?
+
+if [ $STATUS -ne 0 ]; then
+    echo "❌ [ERROR] Tests failed! Blocking git push to protect repository integrity."
+    echo "Please fix the failing tests before pushing."
+    exit 1
+fi
+
+echo "✅ [SUCCESS] All test cases passed! Proceeding with git push."
+exit 0

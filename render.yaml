@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: cloudpulse-microservice
+    env: docker
+    dockerfilePath: Dockerfile
+    plan: free
+    region: oregon
+    healthCheckPath: /health
+    envVars:
+      - key: ENVIRONMENT
+        value: cloud-production
+      - key: PORT
+        value: 8000

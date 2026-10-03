@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  # Load Balancer (Nginx) - Entrypoint on Port 80
+  load-balancer:
+    image: nginx:alpine
+    container_name: cloudpulse-lb
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - web-node-1
+      - web-node-2
+      - web-node-3
+    restart: unless-stopped
+    networks:
+      - cloudpulse-net
+
+  # Microservice Node 1
+  web-node-1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cloudpulse-node-1
+    environment:
+      - INSTANCE_ID=node-us-east-1a
+      - ENVIRONMENT=aws-cluster
+      - PORT=8000
+    restart: unless-stopped
+    networks:
+      - cloudpulse-net
+
+  # Microservice Node 2
+  web-node-2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cloudpulse-node-2
+    environment:
+      - INSTANCE_ID=node-us-east-1b
+      - ENVIRONMENT=aws-cluster
+      - PORT=8000
+    restart: unless-stopped
+    networks:
+      - cloudpulse-net
+
+  # Microservice Node 3
+  web-node-3:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cloudpulse-node-3
+    environment:
+      - INSTANCE_ID=node-us-east-1c
+      - ENVIRONMENT=aws-cluster
+      - PORT=8000
+    restart: unless-stopped
+    networks:
+      - cloudpulse-net
+
+networks:
+  cloudpulse-net:
+    driver: bridge

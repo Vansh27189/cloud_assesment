@@ -1,0 +1,110 @@
+name: CI/CD Pipeline - CloudPulse Microservice
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  # ============================================================
+  # Job 1: Test & Quality Gate (BLOCKS PIPELINE IF TESTS FAIL)
+  # ============================================================
+  test:
+    name: Run Unit & Integration Tests (Quality Gate)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+
+      - name: Syntax & Lint Verification (flake8)
+        run: |
+          # Stop the build if there are Python syntax errors or undefined names
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          # Warning check for complexity
+          flake8 . --count --exit-zero --max-complexity=15 --max-line-length=127 --statistics
+
+      - name: Execute Automated Test Suite (Pytest)
+        run: |
+          # Fails and blocks CI/CD if any of the 8 test cases fail!
+          pytest -v tests/ --junitxml=test-results.xml
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-results
+          path: test-results.xml
+
+  # ============================================================
+  # Job 2: Container Build & Deployment (Only runs if tests pass!)
+  # ============================================================
+  build-and-deploy:
+    name: Build Docker Container & Cloud Deploy
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker Image Locally
+        run: |
+          docker build -t cloudpulse-microservice:latest -t cloudpulse-microservice:${{ github.sha }} .
+
+      - name: Test Docker Container In CI
+        run: |
+          docker run -d --name test-app -p 8000:8000 cloudpulse-microservice:latest
+          sleep 4
+          # Probe container health endpoint
+          curl --fail --retry 3 --retry-delay 2 http://localhost:8000/health || exit 1
+          docker stop test-app
+
+      # Optional AWS ECR Push (activated when repository secrets are set)
+      - name: Configure AWS Credentials
+        if: env.AWS_ACCESS_KEY_ID != ''
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION || 'us-east-1' }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+
+      - name: Log in to Amazon ECR
+        if: env.AWS_ACCESS_KEY_ID != ''
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+
+      - name: Push Docker Image to Amazon ECR
+        if: env.AWS_ACCESS_KEY_ID != ''
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ${{ secrets.ECR_REPOSITORY || 'cloudpulse-microservice' }}
+          IMAGE_TAG: ${{ github.sha }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        run: |
+          docker tag cloudpulse-microservice:latest $REGISTRY/$REPOSITORY:latest
+          docker tag cloudpulse-microservice:latest $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          docker push $REGISTRY/$REPOSITORY:latest
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          echo "Successfully pushed image to AWS ECR: $REGISTRY/$REPOSITORY:latest"

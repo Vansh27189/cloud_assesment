@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CloudPulse - Distributed Microservice Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="brand">
+        <div class="brand-icon">☁️</div>
+        <div>
+          <h1>CloudPulse Microservice</h1>
+          <p>Distributed Cloud Architecture &amp; NLP Processing Node</p>
+        </div>
+      </div>
+      <div class="node-status-bar">
+        <div class="status-indicator">
+          <div class="pulse-dot"></div>
+          <span>LIVE</span>
+        </div>
+        <div>Node: <span id="node-pill" class="node-pill">initializing...</span></div>
+        <div>Env: <span id="env-pill" class="node-pill">PROD</span></div>
+      </div>
+      <div class="quick-links">
+        <a href="/docs" target="_blank" class="btn-link">📖 Swagger API</a>
+        <a href="/health" target="_blank" class="btn-link">🩺 Health Probe</a>
+        <a href="/metrics" target="_blank" class="btn-link">📊 Metrics JSON</a>
+      </div>
+    </header>
+
+    <!-- Real-time Stats Grid -->
+    <div class="metrics-grid">
+      <div class="stat-card">
+        <div class="stat-label">Requests Served</div>
+        <div class="stat-value" id="stat-requests">0</div>
+        <div class="stat-sub">Since container launch</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Avg Latency</div>
+        <div class="stat-value" id="stat-latency">0.00 ms</div>
+        <div class="stat-sub">Internal execution time</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Memory Footprint</div>
+        <div class="stat-value" id="stat-memory">0 MB</div>
+        <div class="stat-sub">Resident set size (RSS)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Active Tasks</div>
+        <div class="stat-value" id="stat-tasks">0</div>
+        <div class="stat-sub">Distributed queue count</div>
+      </div>
+    </div>
+
+    <!-- Main Sections Grid -->
+    <div class="sections-grid">
+      <!-- Section 1: NLP Text & Sentiment Analyzer -->
+      <section class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">🧠 NLP Sentiment &amp; Text Processing</h2>
+          <span style="font-size:0.75rem; color:var(--accent-secondary); font-family:monospace;">POST /api/analyze</span>
+        </div>
+
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:0.75rem;">
+          Test live text processing across worker containers. Click presets or enter custom text:
+        </p>
+
+        <div class="preset-tags">
+          <button type="button" class="tag-btn" data-text="AWS container deployment was seamless, fast, reliable, and highly scalable!">🚀 AWS Success</button>
+          <button type="button" class="tag-btn" data-text="The server crashed with a slow sluggish memory leak and broken database connection.">⚠️ System Crash</button>
+          <button type="button" class="tag-btn" data-text="Docker container handles incoming API traffic via round-robin load balancing.">⚖️ Architecture</button>
+        </div>
+
+        <textarea id="text-input" rows="4" placeholder="Enter text to analyze sentiment, key tokens, and reading time..."></textarea>
+        <button id="analyze-btn" class="btn-primary">⚡ Analyze Sentiment &amp; Text</button>
+
+        <div id="result-card" class="result-card">
+          <div class="result-header">
+            <strong>Sentiment Verdict</strong>
+            <span id="sentiment-badge" class="sentiment-badge">NEUTRAL</span>
+          </div>
+
+          <div style="font-size:0.85rem; color:var(--text-muted); display:flex; justify-content:space-between;">
+            <span>Polarity Score</span>
+            <span id="polarity-score" style="font-weight:bold; color:var(--text-main);">0.0</span>
+          </div>
+          <div class="meter-track">
+            <div id="meter-fill" class="meter-fill"></div>
+          </div>
+
+          <div class="result-meta">
+            <div>Words: <strong id="word-count" style="color:var(--text-main);">0</strong></div>
+            <div>Est. Read Time: <strong id="read-time" style="color:var(--text-main);">0s</strong></div>
+            <div>Handled By: <strong id="processed-by" style="color:var(--accent-secondary); font-family:monospace;">-</strong></div>
+          </div>
+
+          <div style="margin-top:0.75rem;">
+            <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:0.3rem;">Extracted Keywords:</div>
+            <div id="keywords-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 2: Load Balancer & Multi-Node Distribution Visualizer -->
+      <section class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">⚖️ Horizontal Scaling &amp; Node Routing</h2>
+          <span style="font-size:0.75rem; color:var(--accent-secondary); font-family:monospace;">X-Instance-ID Header</span>
+        </div>
+
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:0.75rem;">
+          Demonstrate client-server round-robin load balancing across container instances:
+        </p>
+
+        <button id="test-lb-btn" class="btn-primary" style="margin-bottom:1rem;">🚀 Send 8 Requests Across Nodes</button>
+
+        <div style="overflow-x:auto;">
+          <table class="lb-table" id="lb-table">
+            <thead>
+              <tr>
+                <th>Seq</th>
+                <th>Target Node ID</th>
+                <th>HTTP Status</th>
+                <th>Server Latency</th>
+                <th>Total RTT</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colspan="5" style="text-align:center; color:var(--text-muted); padding:1.5rem;">
+                  Click button above to benchmark distribution across containers.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <!-- Second Row: Distributed Tasks Board & Architecture -->
+    <div class="sections-grid">
+      <!-- Section 3: Task Store -->
+      <section class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">📋 Distributed Task Repository</h2>
+          <span style="font-size:0.75rem; color:var(--accent-secondary); font-family:monospace;">POST /api/tasks</span>
+        </div>
+
+        <form id="task-form" style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+          <input type="text" id="task-title" placeholder="Task title (e.g. Sync S3 Bucket)" style="flex:2; min-width:180px; margin-bottom:0;" required>
+          <select id="task-priority" style="flex:1; min-width:100px; margin-bottom:0;">
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+            <option value="low">Low</option>
+            <option value="critical">Critical</option>
+          </select>
+          <button type="submit" class="btn-primary" style="padding:0.75rem 1rem;">+ Add</button>
+        </form>
+
+        <div class="task-list" id="tasks-container">
+          <div style="color:var(--text-muted); font-size:0.85rem; padding:0.5rem;">Loading tasks...</div>
+        </div>
+      </section>
+
+      <!-- Section 4: Architecture Diagram -->
+      <section class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">🏗️ Cloud Architecture Topology</h2>
+          <span style="font-size:0.75rem; color:var(--accent-secondary); font-family:monospace;">AWS / Docker</span>
+        </div>
+
+        <p style="font-size:0.85rem; color:var(--text-muted);">
+          High-level end-to-end request flow from client to cloud container instances:
+        </p>
+
+        <div class="arch-flow">
+          <div class="arch-node">
+            <div style="font-size:1.5rem;">🌐</div>
+            <div style="font-weight:600; font-size:0.85rem;">Client Browser</div>
+            <div style="font-size:0.7rem; color:var(--text-muted);">HTTP / REST API</div>
+          </div>
+          <div class="arch-arrow">➔</div>
+          <div class="arch-node">
+            <div style="font-size:1.5rem;">🛡️</div>
+            <div style="font-weight:600; font-size:0.85rem;">AWS ALB / Nginx</div>
+            <div style="font-size:0.7rem; color:var(--text-muted);">Port 80/443 Reverse Proxy</div>
+          </div>
+          <div class="arch-arrow">➔</div>
+          <div class="arch-node active-node">
+            <div style="font-size:1.5rem;">🐳</div>
+            <div style="font-weight:600; font-size:0.85rem;">Docker Microservice</div>
+            <div style="font-size:0.7rem; color:var(--accent-secondary);">EC2 / ECS Cluster</div>
+          </div>
+        </div>
+
+        <div style="margin-top:1.5rem; background:rgba(15,23,42,0.6); padding:1rem; border-radius:var(--radius-md); font-size:0.8rem; color:var(--text-muted);">
+          <strong style="color:var(--text-main);">CI/CD Automation Pipeline:</strong><br>
+          Push to GitHub ➔ GitHub Actions runs 8 Pytest suites ➔ Linting check ➔ Build Docker image ➔ Publish to AWS ECR ➔ Rolling deployment.
+        </div>
+      </section>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <p>CloudPulse Distributed Microservice &bull; Designed for AWS Cloud Deployment &bull; Built with FastAPI, Docker &amp; GitHub Actions</p>
+    </footer>
+  </div>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

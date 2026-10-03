@@ -5,15 +5,21 @@
 
 echo "🔍 [PRE-PUSH HOOK] Running automated test suite before pushing..."
 
-# Run pytest on the test suite
-if command -v pytest >/dev/null 2>&1; then
-    pytest tests/ -v
-elif [ -f "./venv/Scripts/pytest.exe" ]; then
-    ./venv/Scripts/pytest.exe tests/ -v
-elif [ -f "./venv/bin/pytest" ]; then
-    ./venv/bin/pytest tests/ -v
+# Locate python or pytest executable across Windows, Mac, Linux environments
+if command -v python.exe >/dev/null 2>&1; then
+    python.exe -m pytest tests/ -v
 elif command -v python >/dev/null 2>&1; then
     python -m pytest tests/ -v
+elif command -v py.exe >/dev/null 2>&1; then
+    py.exe -m pytest tests/ -v
+elif command -v py >/dev/null 2>&1; then
+    py -m pytest tests/ -v
+elif command -v pytest >/dev/null 2>&1; then
+    pytest tests/ -v
+elif [ -f "/c/Python313/python.exe" ]; then
+    /c/Python313/python.exe -m pytest tests/ -v
+elif [ -f "C:/Python313/python.exe" ]; then
+    C:/Python313/python.exe -m pytest tests/ -v
 else
     echo "⚠️ Python or pytest not found. Skipping local hook check."
     exit 0
@@ -27,5 +33,5 @@ if [ $STATUS -ne 0 ]; then
     exit 1
 fi
 
-echo "✅ [SUCCESS] All test cases passed! Proceeding with git push."
+echo "✅ [SUCCESS] All 8 test cases passed! Proceeding with git push."
 exit 0

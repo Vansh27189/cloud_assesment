@@ -72,36 +72,31 @@ jobs:
       - name: Test Docker Container In CI
         run: |
           docker run -d --name test-app -p 8000:8000 cloudpulse-microservice:latest
-          sleep 4
-          # Probe container health endpoint
-          curl --fail --retry 3 --retry-delay 2 http://localhost:8000/health || exit 1
+          sleep 5
+          docker logs test-app
+          curl --fail --retry 5 --retry-delay 2 http://localhost:8000/health || (docker logs test-app && exit 1)
           docker stop test-app
 
       # Optional AWS ECR Push (activated when repository secrets are set)
       - name: Configure AWS Credentials
-        if: env.AWS_ACCESS_KEY_ID != ''
+        if: ${{ secrets.AWS_ACCESS_KEY_ID != '' }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION || 'us-east-1' }}
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
 
       - name: Log in to Amazon ECR
-        if: env.AWS_ACCESS_KEY_ID != ''
+        if: ${{ secrets.AWS_ACCESS_KEY_ID != '' }}
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
 
       - name: Push Docker Image to Amazon ECR
-        if: env.AWS_ACCESS_KEY_ID != ''
+        if: ${{ secrets.AWS_ACCESS_KEY_ID != '' }}
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: ${{ secrets.ECR_REPOSITORY || 'cloudpulse-microservice' }}
           IMAGE_TAG: ${{ github.sha }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         run: |
           docker tag cloudpulse-microservice:latest $REGISTRY/$REPOSITORY:latest
           docker tag cloudpulse-microservice:latest $REGISTRY/$REPOSITORY:$IMAGE_TAG

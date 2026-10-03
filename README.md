@@ -223,5 +223,4 @@ If you don't have active AWS credits and need an instant public URL:
 - [x] **At least 4 basic test cases**: 8 comprehensive test cases implemented in `tests/`.
 - [x] **Block pushing if tests fail**: Enforced via both GitHub Actions CI quality gate and local Git pre-push hook.
 - [x] **2-3 Minute Presentation Guide**: Included in [`PRESENTATION_SCRIPT.md`](file:///d:/cloud_assement/PRESENTATION_SCRIPT.md).
-#   c l o u d _ a s s e s m e n t  
- 
+#

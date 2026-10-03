@@ -13,7 +13,7 @@ This guide provides the simple, step-by-step actions for you to push the project
    - **Visibility**: **Public** (required by assessment)
    - Do **NOT** check "Add a README" or ".gitignore" (we have already created them for you).
 4. Click **Create repository**.
-5. Copy your new repository HTTPS URL (e.g., `https://github.com/YOUR_USERNAME/cloudpulse-microservice.git`).
+5. Copy your new repository HTTPS URL (e.g., `https://github.com/Vansh27189/cloud_assesment.git`).
 
 ---
 
@@ -38,7 +38,7 @@ git commit -m "feat: Initial commit of CloudPulse containerized microservice wit
 git branch -M main
 
 # 6. Add your GitHub remote (replace with your actual GitHub URL from Step 1)
-git remote add origin https://github.com/YOUR_USERNAME/cloudpulse-microservice.git
+git remote add origin https://github.com/Vansh27189/cloud_assesment.git
 
 # 7. Push to GitHub
 git push -u origin main
@@ -101,7 +101,7 @@ If you prefer AWS deployment:
    [Submission Google Sheet](https://docs.google.com/spreadsheets/d/158n95p7F09XiKvoSxIewYPQMSZ8hdg1U5dR02I_Bx3U/edit?usp=sharing)
 2. Enter your details:
    - **Name / Roll Number**
-   - **GitHub Public Repository URL**: `https://github.com/YOUR_USERNAME/cloudpulse-microservice`
+   - **GitHub Public Repository URL**: `https://github.com/Vansh27189/cloud_assesment`
    - **Live Deployed URL**: Your Render URL or EC2 Public IP (`http://<IP>/` or `https://<render-url>/`)
    - **Project Chosen**: Option 1: Containerized microservice on AWS with Load Balancing & CI/CD.
 

@@ -37,7 +37,7 @@ INSTANCE_ID=`curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.25
 
 # 5. Clone repository code (replace with user repository if applicable)
 if [ ! -d "$APP_DIR/.git" ]; then
-    git clone https://github.com/REPLACE_WITH_YOUR_GITHUB_USERNAME/cloudpulse-microservice.git $APP_DIR || true
+    git clone https://github.com/Vansh27189/cloud_assesment.git $APP_DIR || true
 fi
 
 cd $APP_DIR
